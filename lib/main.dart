@@ -32,13 +32,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final todos = List.generate(
-    20,
-        (i) => Todo(
-      'Todo $i',
-      'A description of what needs to be done for Todo $i',
-    ),
-  );
+  final todos = <Todo>[];
+  var titleControl = TextEditingController();
+  var descControl = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,15 +43,64 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: ListView.builder(
         itemCount: todos.length,
-          itemBuilder: (context, index) {
-            return ListTile(
-              title: Text(todos[index].title),
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => DetailScreen(todo: todos[index])));
-              },
-            );
-          },
-        ),
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(todos[index].title),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => DetailScreen(todo: todos[index])));
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.add),
+          onPressed: () {
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Add Todo'),
+                    content: Container(
+                      height: MediaQuery.of(context).size.height / 5,
+                      child: Column(
+                        children: [
+                          TextField(
+                            controller: titleControl,
+                            decoration: const InputDecoration(labelText: 'Title'),
+                          ),
+                          TextField(
+                            controller: descControl,
+                            decoration:
+                                const InputDecoration(labelText: 'Description'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                          onPressed: () {
+                            Todo todo =
+                                Todo(titleControl.text, descControl.text);
+                            setState(() {
+                              todos.add(todo);
+                            });
+                            titleControl.text = '';
+                            descControl.text = '';
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Add')),
+                      TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Cancel')),
+                    ],
+                  );
+                });
+          }),
     );
   }
 }

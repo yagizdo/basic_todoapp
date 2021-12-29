@@ -145,7 +145,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             bool validResult = formKey.currentState!.validate();
                             if (validResult == true) {
                               if(descControl.text == '') {
-                                descControl.text = 'Açıklama girilmedi..';
+                                descControl.text = 'Description is empty.';
                                 Todo todo =
                                 Todo(titleControl.text, descControl.text,false);
                                 setState(() {

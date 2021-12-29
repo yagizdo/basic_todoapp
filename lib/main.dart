@@ -35,6 +35,8 @@ class _MyHomePageState extends State<MyHomePage> {
   final todos = <Todo>[];
   var titleControl = TextEditingController();
   var descControl = TextEditingController();
+
+  var formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,32 +66,61 @@ class _MyHomePageState extends State<MyHomePage> {
                   return AlertDialog(
                     title: const Text('Add Todo'),
                     content: Container(
-                      height: MediaQuery.of(context).size.height / 5,
-                      child: Column(
-                        children: [
-                          TextField(
-                            controller: titleControl,
-                            decoration: const InputDecoration(labelText: 'Title'),
-                          ),
-                          TextField(
-                            controller: descControl,
-                            decoration:
-                                const InputDecoration(labelText: 'Description'),
-                          ),
-                        ],
+                      height: MediaQuery.of(context).size.height / 4,
+                      child: Form(
+                        key: formKey,
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              controller: titleControl,
+                              validator: (value) {
+                                if(value == '') {
+                                  return 'Title cant be empty';
+                                }
+                                return null;
+                              },
+                              decoration: const InputDecoration(border: OutlineInputBorder(),labelText: 'Title', ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top : 20.0),
+                              child: TextField(
+                                controller: descControl,
+                                decoration:
+                                const InputDecoration(border: OutlineInputBorder(),labelText: 'Description', ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     actions: [
-                      TextButton(
+                      ElevatedButton(
                           onPressed: () {
-                            Todo todo =
+                            bool validResult = formKey.currentState!.validate();
+                            if (validResult == true) {
+                              if(descControl.text == '') {
+                                descControl.text = 'Açıklama girilmedi..';
+                                Todo todo =
                                 Todo(titleControl.text, descControl.text);
-                            setState(() {
-                              todos.add(todo);
-                            });
-                            titleControl.text = '';
-                            descControl.text = '';
-                            Navigator.pop(context);
+                                setState(() {
+                                  todos.add(todo);
+                                });
+                                titleControl.text = '';
+                                descControl.text = '';
+                                Navigator.pop(context);
+                              } else {
+                                Todo todo =
+                                Todo(titleControl.text, descControl.text);
+                                setState(() {
+                                  todos.add(todo);
+                                });
+                                titleControl.text = '';
+                                descControl.text = '';
+                                Navigator.pop(context);
+                              }
+
+                            }
+
                           },
                           child: const Text('Add')),
                       TextButton(

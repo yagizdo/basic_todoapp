@@ -1,6 +1,8 @@
 import 'package:data_transfer/detail_screen.dart';
 import 'package:data_transfer/todo.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 void main() {
   runApp(const MyApp());
@@ -33,6 +35,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final todos = <Todo>[];
+  final completedTodos = <Todo>[];
   var titleControl = TextEditingController();
   var descControl = TextEditingController();
 
@@ -41,31 +44,74 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Todos'),
+        title: const Text('Todos'),
       ),
       body: ListView.builder(
         itemCount: todos.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(todos[index].title),
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => DetailScreen(todo: todos[index])));
-            },
+          return Slidable(
+            key: const ValueKey(0),
+            // Delete Panel
+            startActionPane:  ActionPane(
+              motion: const BehindMotion(),
+
+            children: [
+              SlidableAction(
+                backgroundColor: Colors.red,
+                  onPressed: (BuildContext context) {
+                    setState(() {
+                      todos.removeAt(index);
+                    });
+                  },
+                icon: Icons.delete,
+                label: 'delete',
+
+              )
+            ],),
+
+            // Complete Panel
+            endActionPane: ActionPane(
+              motion: const ScrollMotion(),
+
+              children: [
+                SlidableAction(
+                    backgroundColor: Colors.green,
+                    icon: Icons.check_box,
+                    label: 'Complete',
+                    onPressed: (BuildContext context) {
+                  setState(() {
+                    todos[index].complete = true;
+                    completedTodos.add(todos[index]);
+                    todos.removeAt(index);
+                  });
+                }),
+              ],
+            ),
+            child: ListTile(
+              title: Text(todos[index].title,style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold),),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(top : 5.0),
+                child: Text(todos[index].description),
+              ),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => DetailScreen(todo: todos[index])));
+              },
+            ),
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add),
+          child: const Icon(Icons.add),
           onPressed: () {
             showDialog(
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
                     title: const Text('Add Todo'),
-                    content: Container(
+                    content: SizedBox(
                       height: MediaQuery.of(context).size.height / 4,
                       child: Form(
                         key: formKey,
@@ -101,7 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               if(descControl.text == '') {
                                 descControl.text = 'Açıklama girilmedi..';
                                 Todo todo =
-                                Todo(titleControl.text, descControl.text);
+                                Todo(titleControl.text, descControl.text,false);
                                 setState(() {
                                   todos.add(todo);
                                 });
@@ -110,7 +156,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 Navigator.pop(context);
                               } else {
                                 Todo todo =
-                                Todo(titleControl.text, descControl.text);
+                                Todo(titleControl.text, descControl.text,false);
                                 setState(() {
                                   todos.add(todo);
                                 });

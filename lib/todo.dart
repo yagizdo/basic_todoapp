@@ -1,6 +1,8 @@
 class Todo {
-  final String title;
-  final String description;
+   String title;
+   String description;
+   bool complete = false;
 
-  const Todo(this.title, this.description);
+
+  Todo(this.title, this.description,this.complete);
 }

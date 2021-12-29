@@ -1,4 +1,4 @@
-# data_transfer
+# Basic Todo App
 
 A new Flutter project.
 

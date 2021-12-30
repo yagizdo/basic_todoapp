@@ -40,9 +40,31 @@ class _MyHomePageState extends State<MyHomePage> {
   var todos = <Todo>[];
   @override
   void initState() {
-    initSharedPreferences();
     super.initState();
+    initSharedPreferences();
   }
+
+  // Save Data - Shared Preferences
+  void saveData() {
+    List<String>? spList = todos.map((item) => json.encode(item.toMap())).toList();
+    sharedPreferences!.setStringList('list',spList);
+  }
+
+  void loadData() {
+    List<String>? spList = sharedPreferences!.getStringList('list');
+    todos = spList!.map((item) => Todo.fromMap(json.decode(item))).toList();
+    setState(() {
+    });
+  }
+
+  void updateData() {
+    sharedPreferences!.remove('list');
+    List<String>? spList = todos.map((item) => json.encode(item.toMap())).toList();
+    sharedPreferences!.setStringList('list',spList);
+    setState(() {
+    });
+  }
+
   initSharedPreferences()async {
     sharedPreferences = await SharedPreferences.getInstance();
     loadData();
@@ -73,6 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   onPressed: (BuildContext context) {
                     setState(() {
                       todos.removeAt(index);
+                      updateData();
                     });
                   },
                 icon: Icons.delete,
@@ -95,6 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     todos[index].complete = true;
                     completedTodos.add(todos[index]);
                     todos.removeAt(index);
+                    updateData();
                   });
                 }),
               ],
@@ -157,7 +181,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             bool validResult = formKey.currentState!.validate();
                             if (validResult == true) {
                               if(descControl.text == '') {
-                                descControl.text = 'Description is empty.';
+                                descControl.text = '';
                                 Todo todo =
                                 Todo(titleControl.text, descControl.text,false);
                                 setState(() {
@@ -172,6 +196,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 Todo(titleControl.text, descControl.text,false);
                                 setState(() {
                                   todos.add(todo);
+                                  saveData();
                                 });
                                 titleControl.text = '';
                                 descControl.text = '';
@@ -192,17 +217,5 @@ class _MyHomePageState extends State<MyHomePage> {
                 });
           }),
     );
-  }
-  // Save Data - Shared Preferences
-  void saveData() {
-    List<String>? spList = todos.map((item) => json.encode(item.toMap())).toList();
-    sharedPreferences!.setStringList('list',spList);
-  }
-
-  void loadData() {
-    List<String>? spList = sharedPreferences!.getStringList('list');
-    todos = spList!.map((item) => Todo.fromMap(json.decode(item))).toList();
-    setState(() {
-    });
   }
 }

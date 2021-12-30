@@ -2,7 +2,8 @@ import 'package:data_transfer/detail_screen.dart';
 import 'package:data_transfer/todo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,12 +30,23 @@ class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
   final String title;
 
+
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final todos = <Todo>[];
+  SharedPreferences? sharedPreferences ;
+  var todos = <Todo>[];
+  @override
+  void initState() {
+    initSharedPreferences();
+    super.initState();
+  }
+  initSharedPreferences()async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    loadData();
+  }
   final completedTodos = <Todo>[];
   var titleControl = TextEditingController();
   var descControl = TextEditingController();
@@ -150,6 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 Todo(titleControl.text, descControl.text,false);
                                 setState(() {
                                   todos.add(todo);
+                                  saveData();
                                 });
                                 titleControl.text = '';
                                 descControl.text = '';
@@ -179,5 +192,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 });
           }),
     );
+  }
+  // Save Data - Shared Preferences
+  void saveData() {
+    List<String>? spList = todos.map((item) => json.encode(item.toMap())).toList();
+    sharedPreferences!.setStringList('list',spList);
+  }
+
+  void loadData() {
+    List<String>? spList = sharedPreferences!.getStringList('list');
+    todos = spList!.map((item) => Todo.fromMap(json.decode(item))).toList();
+    setState(() {
+    });
   }
 }

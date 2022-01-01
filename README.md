@@ -7,3 +7,4 @@ A simple todo app I made with Flutter.
 - [x] Slidable
 
 ## Screenshots
+![Basic Todo App](https://media.giphy.com/media/COcfaK5EQV7jZYN9Tw/giphy.gif)

@@ -146,74 +146,76 @@ class _MyHomePageState extends State<MyHomePage> {
             showDialog(
                 context: context,
                 builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text('Add Todo'),
-                    content: SizedBox(
-                      height: MediaQuery.of(context).size.height / 4,
-                      child: Form(
-                        key: formKey,
-                        child: Column(
-                          children: [
-                            TextFormField(
-                              controller: titleControl,
-                              validator: (value) {
-                                if(value == '') {
-                                  return 'Title cant be empty';
-                                }
-                                return null;
-                              },
-                              decoration: const InputDecoration(border: OutlineInputBorder(),labelText: 'Title', ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top : 20.0),
-                              child: TextField(
-                                controller: descControl,
-                                decoration:
-                                const InputDecoration(border: OutlineInputBorder(),labelText: 'Description', ),
+                  return SingleChildScrollView(
+                    child: AlertDialog(
+                      title: const Text('Add Todo'),
+                      content: SizedBox(
+                        height: MediaQuery.of(context).size.height / 3.5,
+                        child: Form(
+                          key: formKey,
+                          child: Column(
+                            children: [
+                              TextFormField(
+                                controller: titleControl,
+                                validator: (value) {
+                                  if(value == '') {
+                                    return 'Title cant be empty';
+                                  }
+                                  return null;
+                                },
+                                decoration: const InputDecoration(border: OutlineInputBorder(),labelText: 'Title', ),
                               ),
-                            ),
-                          ],
+                              Padding(
+                                padding: const EdgeInsets.only(top : 20.0),
+                                child: TextField(
+                                  controller: descControl,
+                                  decoration:
+                                  const InputDecoration(border: OutlineInputBorder(),labelText: 'Description', ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    actions: [
-                      ElevatedButton(
-                          onPressed: () {
-                            bool validResult = formKey.currentState!.validate();
-                            if (validResult == true) {
-                              if(descControl.text == '') {
-                                descControl.text = '';
-                                Todo todo =
-                                Todo(titleControl.text, descControl.text,false);
-                                setState(() {
-                                  todos.add(todo);
-                                  saveData();
-                                });
-                                titleControl.text = '';
-                                descControl.text = '';
-                                Navigator.pop(context);
-                              } else {
-                                Todo todo =
-                                Todo(titleControl.text, descControl.text,false);
-                                setState(() {
-                                  todos.add(todo);
-                                  saveData();
-                                });
-                                titleControl.text = '';
-                                descControl.text = '';
-                                Navigator.pop(context);
+                      actions: [
+                        ElevatedButton(
+                            onPressed: () {
+                              bool validResult = formKey.currentState!.validate();
+                              if (validResult == true) {
+                                if(descControl.text == '') {
+                                  descControl.text = '';
+                                  Todo todo =
+                                  Todo(titleControl.text, descControl.text,false);
+                                  setState(() {
+                                    todos.add(todo);
+                                    saveData();
+                                  });
+                                  titleControl.text = '';
+                                  descControl.text = '';
+                                  Navigator.pop(context);
+                                } else {
+                                  Todo todo =
+                                  Todo(titleControl.text, descControl.text,false);
+                                  setState(() {
+                                    todos.add(todo);
+                                    saveData();
+                                  });
+                                  titleControl.text = '';
+                                  descControl.text = '';
+                                  Navigator.pop(context);
+                                }
+
                               }
 
-                            }
-
-                          },
-                          child: const Text('Add')),
-                      TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: const Text('Cancel')),
-                    ],
+                            },
+                            child: const Text('Add')),
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Cancel')),
+                      ],
+                    ),
                   );
                 });
           }),

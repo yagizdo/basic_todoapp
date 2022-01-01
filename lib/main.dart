@@ -50,6 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
     sharedPreferences!.setStringList('list',spList);
   }
 
+  // Load Data - Shared Preferences
   void loadData() {
     List<String>? spList = sharedPreferences!.getStringList('list');
     todos = spList!.map((item) => Todo.fromMap(json.decode(item))).toList();

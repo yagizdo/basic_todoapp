@@ -18,4 +18,8 @@ class Todo {
       'complete' : complete,
     };
   }
+
+  void completeTodo() {
+    complete = !complete;
+  }
 }

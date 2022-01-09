@@ -1,8 +1,9 @@
-import 'package:data_transfer/detail_screen.dart';
+import 'package:data_transfer/Providers/todo_provider.dart';
+import 'package:data_transfer/Widgets/todos_list.dart';
 import 'package:data_transfer/todo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'dart:convert';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -15,13 +16,16 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return ChangeNotifierProvider(
+      create: (BuildContext context) => TodoProvider(),
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: const MyHomePage(title: 'Flutter Demo Home Page'),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
@@ -37,40 +41,13 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   SharedPreferences? sharedPreferences ;
-  var todos = <Todo>[];
+
   @override
   void initState() {
     super.initState();
-    initSharedPreferences();
+    Provider.of<TodoProvider>(context,listen: false).initSharedPreferences();
   }
 
-  // Save Data - Shared Preferences
-  void saveData() {
-    List<String>? spList = todos.map((item) => json.encode(item.toMap())).toList();
-    sharedPreferences!.setStringList('list',spList);
-  }
-
-  // Load Data - Shared Preferences
-  void loadData() {
-    List<String>? spList = sharedPreferences!.getStringList('list');
-    todos = spList!.map((item) => Todo.fromMap(json.decode(item))).toList();
-    setState(() {
-    });
-  }
-
-  void updateData() {
-    sharedPreferences!.remove('list');
-    List<String>? spList = todos.map((item) => json.encode(item.toMap())).toList();
-    sharedPreferences!.setStringList('list',spList);
-    setState(() {
-    });
-  }
-
-  initSharedPreferences()async {
-    sharedPreferences = await SharedPreferences.getInstance();
-    loadData();
-  }
-  final completedTodos = <Todo>[];
   var titleControl = TextEditingController();
   var descControl = TextEditingController();
 
@@ -81,65 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: const Text('Todos'),
       ),
-      body: ListView.builder(
-        itemCount: todos.length,
-        itemBuilder: (context, index) {
-          return Slidable(
-            key: const ValueKey(0),
-            // Delete Panel
-            startActionPane:  ActionPane(
-              motion: const BehindMotion(),
-
-            children: [
-              SlidableAction(
-                backgroundColor: Colors.red,
-                  onPressed: (BuildContext context) {
-                    setState(() {
-                      todos.removeAt(index);
-                      updateData();
-                    });
-                  },
-                icon: Icons.delete,
-                label: 'delete',
-
-              )
-            ],),
-
-            // Complete Panel
-            endActionPane: ActionPane(
-              motion: const ScrollMotion(),
-
-              children: [
-                SlidableAction(
-                    backgroundColor: Colors.green,
-                    icon: Icons.check_box,
-                    label: 'Complete',
-                    onPressed: (BuildContext context) {
-                  setState(() {
-                    todos[index].complete = true;
-                    completedTodos.add(todos[index]);
-                    todos.removeAt(index);
-                    updateData();
-                  });
-                }),
-              ],
-            ),
-            child: ListTile(
-              title: Text(todos[index].title,style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold),),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(top : 5.0),
-                child: Text(todos[index].description),
-              ),
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => DetailScreen(todo: todos[index])));
-              },
-            ),
-          );
-        },
-      ),
+      body: const TodoList(),
       floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.add),
           onPressed: () {
@@ -186,27 +105,19 @@ class _MyHomePageState extends State<MyHomePage> {
                                   descControl.text = '';
                                   Todo todo =
                                   Todo(titleControl.text, descControl.text,false);
-                                  setState(() {
-                                    todos.add(todo);
-                                    saveData();
-                                  });
+                                  Provider.of<TodoProvider>(context,listen: false).addTodo(todo);
                                   titleControl.text = '';
                                   descControl.text = '';
                                   Navigator.pop(context);
                                 } else {
                                   Todo todo =
                                   Todo(titleControl.text, descControl.text,false);
-                                  setState(() {
-                                    todos.add(todo);
-                                    saveData();
-                                  });
+                                  Provider.of<TodoProvider>(context,listen: false).addTodo(todo);
                                   titleControl.text = '';
                                   descControl.text = '';
                                   Navigator.pop(context);
                                 }
-
                               }
-
                             },
                             child: const Text('Add')),
                         TextButton(

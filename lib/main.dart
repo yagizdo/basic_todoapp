@@ -29,11 +29,13 @@ class MyApp extends StatelessWidget {
           title: 'Flutter Demo',
           debugShowCheckedModeBanner: false,
           theme: ThemeData.light(),
-          darkTheme: ThemeData(brightness: Brightness.dark,
-            floatingActionButtonTheme: FloatingActionButtonThemeData(backgroundColor: Colors.black,foregroundColor: Colors.white),
-            appBarTheme: AppBarTheme(backgroundColor: Colors.grey[800]),
-            scaffoldBackgroundColor: Colors.grey[1200],
-          cardColor: Colors.grey[750]),
+          darkTheme: ThemeData(
+              brightness: Brightness.dark,
+              floatingActionButtonTheme: FloatingActionButtonThemeData(
+                  backgroundColor: Colors.black, foregroundColor: Colors.white),
+              appBarTheme: AppBarTheme(backgroundColor: Colors.grey[800]),
+              scaffoldBackgroundColor: Colors.grey[1200],
+              cardColor: Colors.grey[750]),
           themeMode: state.mode,
           home: const MyHomePage(title: 'Flutter Demo Home Page'),
         );
@@ -67,13 +69,99 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: GestureDetector(
+                onTap: () {
+                  Provider.of<ThemeProvider>(context,listen: false).toggleMode();
+                },
+                child: const Icon(Icons.wb_sunny)),
+          )
+        ],
         title: const Text('Todos'),
       ),
       body: const TodoList(),
       floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.add),
           onPressed: () {
-            Provider.of<ThemeProvider>(context, listen: false).toggleMode();
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return SingleChildScrollView(
+                    child: AlertDialog(
+                      title: const Text('Add Todo'),
+                      content: SizedBox(
+                        height: MediaQuery.of(context).size.height / 3.5,
+                        child: Form(
+                          key: formKey,
+                          child: Column(
+                            children: [
+                              TextFormField(
+                                controller: titleControl,
+                                validator: (value) {
+                                  if (value == '') {
+                                    return 'Title cant be empty';
+                                  }
+                                  return null;
+                                },
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  labelText: 'Title',
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 20.0),
+                                child: TextField(
+                                  controller: descControl,
+                                  decoration: const InputDecoration(
+                                    border: OutlineInputBorder(),
+                                    labelText: 'Description',
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      actions: [
+                        ElevatedButton(
+                            onPressed: () {
+                              bool validResult =
+                                  formKey.currentState!.validate();
+                              if (validResult == true) {
+                                if (descControl.text == '') {
+                                  descControl.text = '';
+                                  Todo todo = Todo(titleControl.text,
+                                      descControl.text, false);
+                                  Provider.of<TodoProvider>(context,
+                                          listen: false)
+                                      .addTodo(todo);
+                                  titleControl.text = '';
+                                  descControl.text = '';
+                                  Navigator.pop(context);
+                                } else {
+                                  Todo todo = Todo(titleControl.text,
+                                      descControl.text, false);
+                                  Provider.of<TodoProvider>(context,
+                                          listen: false)
+                                      .addTodo(todo);
+                                  titleControl.text = '';
+                                  descControl.text = '';
+                                  Navigator.pop(context);
+                                }
+                              }
+                            },
+                            child: const Text('Add')),
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Cancel')),
+                      ],
+                    ),
+                  );
+                });
           }),
     );
   }

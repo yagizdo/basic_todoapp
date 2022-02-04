@@ -1,11 +1,16 @@
+import 'dart:typed_data';
+
+import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:data_transfer/Providers/theme_provider.dart';
 import 'package:data_transfer/Providers/todo_provider.dart';
 import 'package:data_transfer/Widgets/todos_list.dart';
+import 'package:data_transfer/splash_screen.dart';
 import 'package:data_transfer/todo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart';
 
 void main() {
   runApp(const MyApp());
@@ -37,7 +42,7 @@ class MyApp extends StatelessWidget {
               scaffoldBackgroundColor: Colors.grey[1200],
               cardColor: Colors.grey[750]),
           themeMode: state.mode,
-          home: const MyHomePage(title: 'Flutter Demo Home Page'),
+          home: Splash(),
         );
       }),
     );
@@ -61,10 +66,22 @@ class _MyHomePageState extends State<MyHomePage> {
     Provider.of<TodoProvider>(context, listen: false).initSharedPreferences();
   }
 
+  Future pickImage() async {
+    XFile? image = await ImagePicker().pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      Uint8List imageBytes = await image.readAsBytes();
+
+      Provider.of<TodoProvider>(context, listen: false)
+          .imageToBase64(imageBytes);
+    }
+  }
+
   var titleControl = TextEditingController();
   var descControl = TextEditingController();
 
   var formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,7 +91,8 @@ class _MyHomePageState extends State<MyHomePage> {
             padding: const EdgeInsets.all(15.0),
             child: GestureDetector(
                 onTap: () {
-                  Provider.of<ThemeProvider>(context,listen: false).toggleMode();
+                  Provider.of<ThemeProvider>(context, listen: false)
+                      .toggleMode();
                 },
                 child: const Icon(Icons.wb_sunny)),
           )
@@ -92,7 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: AlertDialog(
                       title: const Text('Add Todo'),
                       content: SizedBox(
-                        height: MediaQuery.of(context).size.height / 3.5,
+                        height: MediaQuery.of(context).size.height / 3.2,
                         child: Form(
                           key: formKey,
                           child: Column(
@@ -120,6 +138,14 @@ class _MyHomePageState extends State<MyHomePage> {
                                   ),
                                 ),
                               ),
+                              Padding(
+                                  padding: const EdgeInsets.only(top: 20.0),
+                                  child: ElevatedButton(
+                                    child: const Text("Upload image"),
+                                    onPressed: () async {
+                                      await pickImage();
+                                    },
+                                  )),
                             ],
                           ),
                         ),
@@ -130,10 +156,11 @@ class _MyHomePageState extends State<MyHomePage> {
                               bool validResult =
                                   formKey.currentState!.validate();
                               if (validResult == true) {
+                                Uint8List imageBytes = Provider.of<TodoProvider>(context, listen: false).base64ToImage();
                                 if (descControl.text == '') {
                                   descControl.text = '';
                                   Todo todo = Todo(titleControl.text,
-                                      descControl.text, false);
+                                      descControl.text, false, imageBytes);
                                   Provider.of<TodoProvider>(context,
                                           listen: false)
                                       .addTodo(todo);
@@ -142,7 +169,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   Navigator.pop(context);
                                 } else {
                                   Todo todo = Todo(titleControl.text,
-                                      descControl.text, false);
+                                      descControl.text, false, imageBytes);
                                   Provider.of<TodoProvider>(context,
                                           listen: false)
                                       .addTodo(todo);

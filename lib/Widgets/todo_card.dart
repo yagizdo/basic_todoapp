@@ -44,12 +44,21 @@ class TodoCard extends StatelessWidget {
               })
         ],
       ),
-      child: Container(
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height / 11,
         width: MediaQuery.of(context).size.width /1,
         child: Card(
-          child: Column(children: [
-            Text(todo.title),
-            Text(todo.description),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(todo.title),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left : 8, top : 3),
+              child: Text(todo.description),
+            ),
           ],),
         ),
       ),
